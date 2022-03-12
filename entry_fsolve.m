@@ -1,4 +1,4 @@
-%%
+%% ç«æ˜Ÿå¤§æ°”è¿›å…¥æœ«æ®µé«˜åº¦æœ€å¤§åŒ–ï¼Œæ— çº¦æŸ
 clc; clear all; close all;
 global GM R0 g0 Vs Ts hs rho0 mass Sr CD CL Rn kQ ...
     u_min u_max c0 c1 h0 r0 V0 gamma0 Vf lambda_rf lambda_gammaf Hf ...
@@ -29,7 +29,7 @@ qmax=10e3;
 Qmax=70e4;
 gmax=5*9.80665/g0;
 
-%% ÄÜÁ¿×îÓÅ J=0.5*¡Òu^2d¦Ó
+%% èƒ½é‡æœ€ä¼˜ J=0.5*âˆ«u^2dÏ„ æ— çº¦æŸ
 
 h0=125e3;
 r0=1+h0/R0;
@@ -47,10 +47,9 @@ options=odeset('Events',@entry_u_events);
 tauf=tout(end);
 xf=xout(end,:);
 rf=xf(1);
-% Vf=xf(2);
 gammaf=xf(3);
 
-% ÓÉÓÚlambda_rf=0 lambda_gammaf=0 Hf=0 µ¼ÖÂlambda_Vf=0
+% ç”±äºlambda_rf=0 lambda_gammaf=0 Hf=0 å¯¼è‡´lambda_Vf=0
 % uf=0; % u=cos(sigma)==0
 % hf=(rf-1)*R0;
 % rhof=rho0*exp(-hf/hs);
@@ -59,34 +58,38 @@ gammaf=xf(3);
 % rfdot=Vf*sin(gammaf);
 % Vfdot=-Df-sin(gammaf)/rf^2;
 % gammafdot=Lf*uf/Vf + Vf*cos(gammaf)/rf - cos(gammaf)/rf^2/Vf;
-% lambda_Vf=(lambda_rf*rfdot+lambda_gammaf*gammafdot+0.5*uf^2)/Vfdot;% Hf=0
+% lambda_Vf=(lambda_rf*rfdot+lambda_gammaf*gammafdot+0.5*uf^2)/Vfdot;%% Hf=0
 lambda_Vf=0;
 yf=[xf,lambda_rf,lambda_Vf,lambda_gammaf];
-[~,yout]=ode45(@entry_u_lambda,[tauf,0],yf); % Yf=N¡Á7
+[~,yout]=ode45(@entry_u_lambda,[tauf,0],yf); % Yf=NÃ—7
 y0=yout(end,:);
 lambda0=y0(4:6);
-%% zheng yiyu Í¬Â×·¨
-ee=[1e-4;1e-2;1e-1;3e-1;5e-1;7e-1;9e-1;
-    9.2e-1;9.4e-1;9.6e-1;9.8e-1;
-    9.82e-1;9.84e-1;9.86e-1;9.88e-1;9.9e-1;
-    9.905e-1;9.91e-1;9.915e-1;9.92e-1;9.925e-1;9.93e-1];
-%     9.935e-1;9.94e-1;9.945e-1;9.95e-1;9.955e-1;9.96e-1;
-%     9.965e-1;9.97e-1;9.975e-1;9.98e-1;9.985e-1;9.99e-1];
+%% zheng yiyu åŒä¼¦æ³• æ— çº¦æŸ
+ee=[1e-6;1e-4;1e-2;2e-2;4e-2;6e-2;8e-2;1e-1;3e-1;5e-1;7e-1;9e-1;
+    9.1e-1;9.2e-1;9.3e-1;9.4e-1;9.5e-1;9.6e-1;9.7e-1;9.8e-1;
+    9.9e-1;9.91e-1;9.95e-1];
+
+h0=125e3;
+r0=1+h0/R0;
+V0=6e3/Vs;
+gamma0=-11.5*pi/180;
+Vf=540/Vs;
+
 lambda_gammaf=0;
 Hf=0;
 
-% opt = optimoptions(@fsolve,'Algorithm','trust-region-dogleg'); %,'TolFun',1e-6 ,'Maxfuneval',2000 ÏÔÊ¾Çó½âĞÅÏ¢Ê±£¬µü´ú³¬¹ıÁËÄ¬ÈÏµÄ×î´óÖµ700´Î
-% trust-region-dogleg trust-region-reflective levenberg-marquardt
 Y0=[lambda0, tauf];
 for n=1:length(ee)
-    e=ee(n)
+    e=ee(n);
     lambda_rf=-e;
-    [Y, fval, exitflag, output, jacobian] = fsolve(@entry_e_shooting,Y0); %,opt fsolve¶Ô³õÖµ·Ç³£Ãô¸Ğ£¬Ê¹Ğ­Ì¬³õÖµ½øĞĞ²Â²â
+    [Y, fval, exitflag, output, jacobian] = fsolve(@entry_e_shooting,Y0); %,opt fsolveå¯¹åˆå€¼éå¸¸æ•æ„Ÿï¼Œä½¿åæ€åˆå€¼è¿›è¡ŒçŒœæµ‹
     Y0=Y;
 end
 y0=[r0,V0,gamma0,Y0(1:3)];
-[tout,yout]=ode45(@entry_e_lambda,[0,Y0(4)],y0); % Yf=N¡Á7
+[tout,yout]=ode45(@entry_e_lambda,[0,Y0(4)],y0); % Yf=NÃ—7
 yf=yout(end,:);
+
+%%
 figure;
 subplot(3,1,1); plot(tout,yout(:,1));
 subplot(3,1,2); plot(tout,yout(:,2));
@@ -95,15 +98,3 @@ figure;
 subplot(3,1,1); plot(tout,yout(:,4));
 subplot(3,1,2); plot(tout,yout(:,5));
 subplot(3,1,3); plot(tout,yout(:,6));
-%% kshitij mall Í¬Â×
-ec=1e-6;
-eq=1e-6;
-eQ=1e-6;
-eg=1e-6;
-
-% opt = optimoptions(@fsolve,'Algorithm','trust-region-dogleg'); %,'TolFun',1e-6 ,'Maxfuneval',2000 ÏÔÊ¾Çó½âĞÅÏ¢Ê±£¬µü´ú³¬¹ıÁËÄ¬ÈÏµÄ×î´óÖµ700´Î
-% trust-region-dogleg trust-region-reflective levenberg-marquardt
-
-Y0=[lambda0, tauf];
-[Y, fval, exitflag, output, jacobian] = fsolve(@entry_shooting,Y0); %,opt fsolve¶Ô³õÖµ·Ç³£Ãô¸Ğ£¬Ê¹Ğ­Ì¬³õÖµ½øĞĞ²Â²â
-
