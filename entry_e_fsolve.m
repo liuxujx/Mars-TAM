@@ -87,8 +87,18 @@ for n=1:length(ee)
 end
 y0=[r0,V0,gamma0,Y0(1:3)];
 [tout,yout]=ode45(@entry_e_lambda,[0,Y0(4)],y0); % Yf=N×7
-yf=yout(end,:);
+yf=[yout(end,1)*R0-R0,yout(end,2)*Vs,yout(end,3)*180/pi];
 
+
+uout0=-yout(:,6)*R0*rho0.*exp(-R0*(yout(:,1)-1)/hs).*yout(:,2).^2*Sr*CL/(2*mass)./yout(:,2)/(1-e);
+uout=uout0;
+for n=1:length(uout)
+    if uout(n)>u_max
+        uout(n)=u_max;
+    elseif uout(n)<u_min
+        uout(n)=u_min;
+    end
+end
 %%
 figure;
 subplot(3,1,1); plot(tout,yout(:,1));
@@ -98,3 +108,6 @@ figure;
 subplot(3,1,1); plot(tout,yout(:,4));
 subplot(3,1,2); plot(tout,yout(:,5));
 subplot(3,1,3); plot(tout,yout(:,6));
+figure;
+subplot(2,1,1);plot(tout,uout0,tout,u_max*ones(size(uout0)),tout,u_min*ones(size(uout0)))
+subplot(2,1,2);plot(tout,uout,tout,u_max*ones(size(uout0)),tout,u_min*ones(size(uout0)))
